@@ -4,31 +4,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generateButton');
     const copyButton = document.getElementById('copyButton');
     const numAnimalsInput = document.getElementById('numAnimals');
-    const numLengthInput = document.getElementById('numLength');
     const includeUppercaseCheckbox = document.getElementById('includeUppercase');
     const strengthIndicator = document.getElementById('strengthIndicator');
 
-    // Array di nomi di animali (puoi espanderlo!)
-    const animals = [
-        'leone', 'tigre', 'elefante', 'giraffa', 'serpente', 'aquila', 'orso', 'zebra',
-        'cervo', 'lupo', 'volpe', 'puma', 'koala', 'panda', 'scoiattolo', 'fenicottero',
-        'rinoceronte', 'ippopotamo', 'coccodrillo', 'canguro', 'iguana', 'pinguino',
-        'balena', 'delfino', 'squalo', 'polpo', 'tartaruga', 'alligatore', 'bufalo',
-        'chimpanzé', 'gorilla', 'struzzo', 'ghepardo', 'furetto', 'castoro', 'ornitorinco',
-        'tasso', 'suricato', 'cammello', 'lama', 'alpaca', 'fenice', 'unicorno' // Anche un tocco di fantasia!
-    ];
+    // Variabile per l'array degli animali. Verrà popolata dinamicamente.
+    let animals = []; 
 
-    // Caratteri speciali sicuri
-    const specialChars = '!@#$%^&*()_-+=[]{};:,.<>?';
+    // Caratteri speciali ristretti come richiesto
+    const specialChars = '@#$%&*?!+';
 
     // Funzione per ottenere un elemento casuale da un array
     function getRandomItem(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    // Funzione per capitalizzare la prima lettera di una stringa
-    function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+    // Funzione per capitalizzare la prima e l'ultima lettera di una stringa
+    function applyCapitalization(animalName) {
+        if (animalName.length === 0) return '';
+        if (animalName.length === 1) return animalName.charAt(0).toUpperCase();
+        
+        let firstChar = animalName.charAt(0).toUpperCase();
+        let lastChar = animalName.charAt(animalName.length - 1).toUpperCase();
+        let middleChars = animalName.slice(1, -1).toLowerCase();
+        
+        return firstChar + middleChars + lastChar;
     }
 
     // Funzione per generare una stringa di numeri casuali
@@ -40,76 +39,102 @@ document.addEventListener('DOMContentLoaded', () => {
         return result;
     }
 
+    // Funzione per generare un numero casuale di caratteri speciali (tra 1 e 3)
+    function generateRandomSpecialChars(min = 1, max = 3) {
+        const numChars = Math.floor(Math.random() * (max - min + 1)) + min;
+        let chars = '';
+        for (let i = 0; i < numChars; i++) {
+            chars += getRandomItem(specialChars);
+        }
+        return chars;
+    }
+
     // Funzione principale per generare la password
     function generatePassword() {
-        const numAnimalsToUse = parseInt(numAnimalsInput.value);
-        const numberSequenceLength = parseInt(numLengthInput.value);
-        const shouldIncludeUppercase = includeUppercaseCheckbox.checked;
-
-        if (numAnimalsToUse < 1 || numberSequenceLength < 1) {
-            alert("Il numero di animali e la lunghezza dei numeri devono essere almeno 1.");
+        // Se la lista degli animali non è ancora caricata, avvisa e esci
+        if (animals.length === 0) {
+            strengthIndicator.textContent = 'Caricamento animali in corso... Riprova tra un istante.';
+            strengthIndicator.className = 'strength-indicator weak';
             return '';
         }
 
-        let animalSegment = '';
-        let generatedAnimals = [];
+        const numAnimalsToUse = parseInt(numAnimalsInput.value);
+        const shouldIncludeUppercase = includeUppercaseCheckbox.checked;
 
-        // 1. Genera e concatena i nomi degli animali
-        for (let i = 0; i < numAnimalsToUse; i++) {
-            let animal = getRandomItem(animals);
-            if (shouldIncludeUppercase && Math.random() > 0.5) { // Capitalizza casualmente
-                animal = capitalizeFirstLetter(animal);
-            }
-            generatedAnimals.push(animal);
+        if (numAnimalsToUse < 1) {
+            alert("Il numero di animali deve essere almeno 1.");
+            return '';
         }
-        animalSegment = generatedAnimals.join('');
 
-        // 2. Genera la sequenza numerica
+        // Controllo per evitare di chiedere più animali di quanti disponibili
+        if (numAnimalsToUse > animals.length) {
+            alert(`Non ci sono abbastanza animali unici. Scegli un numero massimo di ${animals.length} animali.`);
+            return '';
+        }
+
+        let passwordSegments = [];
+        let availableAnimals = [...animals]; // Crea una copia per non modificare l'array originale
+        let totalAnimalCharsLength = 0; // Inizializza la lunghezza totale dei caratteri degli animali
+
+        // 1. Genera i nomi degli animali unici con maiuscole (prima e ultima lettera) e caratteri speciali alla fine
+        for (let i = 0; i < numAnimalsToUse; i++) {
+            const randomIndex = Math.floor(Math.random() * availableAnimals.length);
+            let animal = availableAnimals[randomIndex];
+            availableAnimals.splice(randomIndex, 1); // Rimuovi l'animale selezionato
+
+            totalAnimalCharsLength += animal.length; // Aggiungi la lunghezza dell'animale (senza speciali)
+
+            if (shouldIncludeUppercase) {
+                animal = applyCapitalization(animal);
+            } else {
+                animal = animal.toLowerCase(); // Se non maiuscole, assicurati sia tutto minuscolo
+            }
+
+            // Aggiungi 1 o più caratteri speciali alla fine del nome dell'animale
+            animal += generateRandomSpecialChars();
+            passwordSegments.push(animal);
+        }
+
+        // 2. Separa gli animali con uno o più caratteri speciali (se ci sono più animali)
+        let animalPartsWithSeparators = '';
+        if (passwordSegments.length > 0) {
+            animalPartsWithSeparators = passwordSegments[0];
+            for (let i = 1; i < passwordSegments.length; i++) {
+                animalPartsWithSeparators += generateRandomSpecialChars(); // Separatore tra animali
+                animalPartsWithSeparators += passwordSegments[i];
+            }
+        }
+        
+        // 3. Genera la sequenza numerica basata sulla lunghezza degli animali
+        let numberSequenceLength = Math.max(3, Math.min(6, Math.floor(totalAnimalCharsLength / 2)));
+        
         let numberSegment = generateRandomNumberString(numberSequenceLength);
 
-        // 3. Scegli i tre caratteri speciali
-        const charStart = getRandomItem(specialChars);
-        const charEnd = getRandomItem(specialChars);
-        const charMiddle = getRandomItem(specialChars);
-
-        // 4. Assembla la password in base alle regole:
-        // Inizio: charStart
-        // Poi: Segmento Animali
-        // Poi: (temporaneamente) Segmento Numeri
-        // Fine: charEnd
-        // Infine, inserisce charMiddle al centro.
-
-        let rawPassword = charStart + animalSegment + numberSegment + charEnd;
-
-        // Inserisci il carattere speciale al centro
-        // Trova il punto medio, arrotondando per eccesso per evitare problemi con lunghezze pari
-        const midPoint = Math.floor(rawPassword.length / 2); 
-        let finalPassword = rawPassword.slice(0, midPoint) + charMiddle + rawPassword.slice(midPoint);
+        // 4. Assembla la password finale
+        let finalPassword = animalPartsWithSeparators + numberSegment;
 
         return finalPassword;
     }
 
-    // Funzione per valutare la forza della password
+    // Funzione per valutare la forza della password (nessuna modifica)
     function evaluatePasswordStrength(password) {
         let strength = 0;
         let feedback = '';
 
-        // Controlli sulla lunghezza
-        if (password.length < 8) {
+        if (password.length < 14) {
             strength = 0;
-            feedback = 'Molto debole: troppo corta.';
-        } else if (password.length < 12) {
-            strength += 20;
+            feedback = 'Molto debole: troppo corta (minimo 14-16 caratteri suggeriti).';
+        } else if (password.length < 18) {
+            strength += 25;
             feedback = 'Debole: considera una lunghezza maggiore.';
-        } else if (password.length >= 12) {
-            strength += 40; // Base per password lunghe
+        } else if (password.length >= 18) {
+            strength += 50;
         }
 
-        // Tipi di caratteri
         const hasLowercase = /[a-z]/.test(password);
         const hasUppercase = /[A-Z]/.test(password);
         const hasNumbers = /[0-9]/.test(password);
-        const hasSpecialChars = /[!@#$%^&*()_\-+=\[\]{};:,.<>?]/.test(password);
+        const hasSpecialChars = /[@#$%&*?!+]/.test(password);
 
         let charTypesCount = 0;
         if (hasLowercase) charTypesCount++;
@@ -118,18 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasSpecialChars) charTypesCount++;
 
         if (charTypesCount >= 4) {
-            strength += 60; // Tutti i tipi di caratteri
+            strength += 50;
         } else if (charTypesCount === 3) {
-            strength += 40;
+            strength += 30;
             feedback += ' Include 3 tipi di caratteri.';
         } else if (charTypesCount === 2) {
-            strength += 20;
+            strength += 10;
             feedback += ' Include 2 tipi di caratteri.';
         } else {
             feedback += ' Troppo pochi tipi di caratteri.';
         }
 
-        // Aggiorna l'indicatore di forza
         if (strength >= 90) {
             strengthIndicator.textContent = 'Forza: Fortissima! 💪';
             strengthIndicator.className = 'strength-indicator strong';
@@ -149,14 +173,16 @@ document.addEventListener('DOMContentLoaded', () => {
     generateButton.addEventListener('click', () => {
         const newPassword = generatePassword();
         passwordOutput.value = newPassword;
-        evaluatePasswordStrength(newPassword);
+        // Solo valuta la forza se la password è stata effettivamente generata
+        if (newPassword) { 
+            evaluatePasswordStrength(newPassword);
+        }
     });
 
     copyButton.addEventListener('click', () => {
         if (passwordOutput.value) {
             navigator.clipboard.writeText(passwordOutput.value).then(() => {
                 copyButton.textContent = 'Copiato!';
-                // Resetta il testo del bottone dopo 2 secondi
                 setTimeout(() => {
                     copyButton.textContent = 'Copia';
                 }, 2000);
@@ -167,6 +193,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Genera una password all'avvio dell'applicazione
-    generateButton.click();
+    // --- NUOVA LOGICA: Caricamento dinamico degli animali ---
+    async function loadAnimals() {
+        try {
+            // Utilizza fetch per caricare il file animals.json
+            const response = await fetch('animals.json');
+            if (!response.ok) {
+                throw new Error(`Errore di caricamento: ${response.status} ${response.statusText}`);
+            }
+            animals = await response.json(); // Parcela la risposta JSON nell'array animals
+            console.log('Animali caricati con successo:', animals.length);
+            // Genera la prima password solo dopo che gli animali sono stati caricati
+            generateButton.click(); 
+        } catch (error) {
+            console.error("Impossibile caricare la lista degli animali:", error);
+            strengthIndicator.textContent = "Errore: impossibile caricare lista animali. Riprova più tardi.";
+            strengthIndicator.className = 'strength-indicator weak';
+            // Disabilita il pulsante di generazione se non si possono caricare gli animali
+            generateButton.disabled = true;
+        }
+    }
+
+    // Carica gli animali all'avvio dell'applicazione
+    loadAnimals();
 });
