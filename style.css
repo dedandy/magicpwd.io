@@ -1,0 +1,169 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #e0f2f7; /* Un blu chiaro accogliente */
+    margin: 0;
+    color: #333;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 450px;
+    border: 1px solid #cce7ee;
+}
+
+h1 {
+    color: #007bff; /* Blu primario */
+    margin-bottom: 10px;
+    font-size: 2em;
+}
+
+p {
+    margin-bottom: 25px;
+    color: #555;
+}
+
+.input-group {
+    display: flex;
+    margin-bottom: 25px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden; /* Per contenere il bordo */
+}
+
+#passwordOutput {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: none;
+    font-size: 1.15em;
+    background-color: #f8fafd;
+    outline: none;
+    color: #333;
+}
+
+#copyButton {
+    padding: 12px 18px;
+    background-color: #28a745; /* Verde per l'azione di copia */
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+#copyButton:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+#copyButton:active {
+    transform: translateY(0);
+}
+
+.options {
+    display: flex;
+    flex-wrap: wrap; /* Permette il wrapping su schermi più piccoli */
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.options label {
+    display: flex;
+    align-items: center;
+    color: #444;
+    font-size: 0.95em;
+}
+
+.options input[type="number"] {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    margin-left: 5px;
+}
+
+.options input[type="checkbox"] {
+    margin-left: 8px;
+    transform: scale(1.2); /* Ingrandisce la checkbox */
+}
+
+#generateButton {
+    padding: 14px 30px;
+    background-color: #007bff; /* Blu primario per l'azione principale */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+#generateButton:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+#generateButton:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+.strength-indicator {
+    margin-top: 25px;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 8px;
+    border-radius: 5px;
+    min-height: 20px; /* Previene il "salto" del layout */
+}
+
+/* Colori per la forza della password */
+.strength-indicator.weak {
+    color: #dc3545; /* Rosso */
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+.strength-indicator.medium {
+    color: #ffc107; /* Giallo/Arancione */
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+}
+.strength-indicator.strong {
+    color: #28a745; /* Verde */
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+/* Responsive design basic */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    .options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .options label {
+        width: 100%; /* Occupa tutta la larghezza su mobile */
+        justify-content: space-between; /* Sposta input a destra */
+    }
+    .options input[type="number"], .options input[type="checkbox"] {
+        margin-left: 0; /* Rimuove il margine sinistro su mobile */
+    }
+}
